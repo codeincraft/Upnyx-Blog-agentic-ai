@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Env
+.env
+venv/
+ENV/
+env/
+
+# Mac
+.DS_Store
+
+# Other
+.idea/
+.vscode/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Env
+.env
+venv/
+ENV/
+env/
+
+# Mac
+.DS_Store
+
+# Other
+.idea/
+.vscode/
