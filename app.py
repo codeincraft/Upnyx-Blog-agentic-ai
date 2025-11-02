@@ -7,9 +7,9 @@ Date: 2025
 """
 
 
-
 import os
 import sys
+import logging
 import traceback
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
@@ -18,37 +18,46 @@ from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.tools import WikipediaQueryRun, DuckDuckGoSearchRun
 from groq import BadRequestError
 
+# ============================================================
+# 🧩 1. Configure Logging
+# ============================================================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler("app.log", mode="a")
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # ============================================================
-# 🔧 1. Load environment variables
+# 🔧 2. Load Environment Variables
 # ============================================================
 load_dotenv()
 
 api_key = os.getenv("GROQ_API_KEY")
 if not api_key:
-    print(" Error: GROQ_API_KEY not found in environment. Please set it in your .env file.")
+    logger.critical("❌ GROQ_API_KEY not found in environment. Please set it in your .env file.")
     sys.exit(1)
 
-
 # ============================================================
-#  2. Initialize tools
+#  3. Initialize Tools
 # ============================================================
 wikipedia_tool = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(top_k_results=2))
 web_search_tool = DuckDuckGoSearchRun()
 tools = [wikipedia_tool, web_search_tool]
 
-
 # ============================================================
-#  3. Preferred models (with fallback order)
+#  4. Preferred Models (with fallback order)
 # ============================================================
-PREFERRED_MODELS = [  
-    "llama-3.1-8b-instant",     # original
-    "mixtral-8x7b-32768",       # fallback
+PREFERRED_MODELS = [
+    "llama-3.1-8b-instant",
+    "mixtral-8x7b-32768",
 ]
 
-
 # ============================================================
-#  4. Initialize LLM with Fallback and Error Handling
+#  5. Initialize LLM with Fallback and Error Handling
 # ============================================================
 def initialize_llm_with_fallback(api_key: str, preferred_models=PREFERRED_MODELS, **kwargs):
     """
@@ -57,7 +66,7 @@ def initialize_llm_with_fallback(api_key: str, preferred_models=PREFERRED_MODELS
     """
     last_exception = None
     for model_name in preferred_models:
-        print(f"🧠 Attempting to initialize model: {model_name}")
+        logger.info(f"🧠 Attempting to initialize model: {model_name}")
         try:
             llm = ChatGroq(
                 groq_api_key=api_key,
@@ -66,26 +75,25 @@ def initialize_llm_with_fallback(api_key: str, preferred_models=PREFERRED_MODELS
                 temperature=0.3,
                 **kwargs,
             )
-            print(f" Successfully initialized model: {model_name}")
+            logger.info(f"✅ Successfully initialized model: {model_name}")
             return llm
 
         except BadRequestError as e:
             last_exception = e
-            print(f" Model '{model_name}' unavailable or decommissioned:\n   {e}")
+            logger.warning(f"⚠️ Model '{model_name}' unavailable or decommissioned: {e}")
         except Exception as e:
             last_exception = e
-            print(f" Unexpected error while initializing '{model_name}': {e}")
-            traceback.print_exc()
+            logger.error(f"❗ Unexpected error while initializing '{model_name}': {e}")
+            logger.debug(traceback.format_exc())
 
     # If no model succeeded
     raise RuntimeError(
-        " Failed to initialize any preferred LLM models.\n"
+        "❌ Failed to initialize any preferred LLM models.\n"
         "Please verify your GROQ_API_KEY and check available models in your Groq dashboard."
     ) from last_exception
 
-
 # ============================================================
-# 🧩 5. Initialize Agent Safely
+# 🤖 6. Initialize Agent Safely
 # ============================================================
 try:
     llm = initialize_llm_with_fallback(api_key, preferred_models=PREFERRED_MODELS)
@@ -95,16 +103,15 @@ try:
         agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True
     )
-    print("🤖 Agent successfully initialized.\n")
+    logger.info("🤖 Agent successfully initialized.\n")
 
 except Exception as e:
-    print(" Critical error initializing the agent:")
-    traceback.print_exc()
+    logger.critical("🔥 Critical error initializing the agent.")
+    logger.debug(traceback.format_exc())
     sys.exit(1)
 
-
 # ============================================================
-# ✍️ 6. Blog Generation Function (with robust error handling)
+# ✍️ 7. Blog Generation Function
 # ============================================================
 def generate_blog(topic: str) -> str:
     """
@@ -124,37 +131,36 @@ def generate_blog(topic: str) -> str:
     """
 
     try:
-        print("🚀 Generating blog content...")
+        logger.info("🚀 Generating blog content...")
         response = agent.run(prompt)
-        print("✅ Blog successfully generated.")
+        logger.info("✅ Blog successfully generated.")
         return response
 
     except BadRequestError as e:
-        print(" Groq API returned a bad request. Possible causes:")
-        print("- Model may be deprecated or invalid.")
-        print("- Invalid prompt or rate limit reached.")
-        print(f"Details: {e}")
-        traceback.print_exc()
+        logger.error("Groq API returned a bad request — possible causes:")
+        logger.error("- Model may be deprecated or invalid.")
+        logger.error("- Invalid prompt or rate limit reached.")
+        logger.error(f"Details: {e}")
+        logger.debug(traceback.format_exc())
 
     except Exception as e:
-        print(" Unexpected error during blog generation:")
-        traceback.print_exc()
+        logger.error("Unexpected error during blog generation:")
+        logger.debug(traceback.format_exc())
 
     # Return safe message on failure
     return (
-        " Sorry, something went wrong while generating the blog. "
+        "⚠️ Sorry, something went wrong while generating the blog. "
         "Please check your connection or API key and try again."
     )
 
-
 # ============================================================
-# 🧭 7. CLI Entrypoint
+# 🧭 8. CLI Entrypoint
 # ============================================================
 if __name__ == "__main__":
     try:
         topic = input("📝 Enter a blog topic: ").strip()
         if not topic:
-            print(" Error: Topic cannot be empty.")
+            logger.error("❌ Topic cannot be empty.")
             sys.exit(1)
 
         blog = generate_blog(topic)
@@ -163,9 +169,9 @@ if __name__ == "__main__":
         print(blog)
 
     except KeyboardInterrupt:
-        print("\n🚪 Exiting gracefully. Goodbye!")
+        logger.info("👋 Exiting gracefully. Goodbye!")
         sys.exit(0)
     except Exception as e:
-        print(" Unexpected fatal error in main execution:")
-        traceback.print_exc()
+        logger.critical("💀 Unexpected fatal error in main execution.")
+        logger.debug(traceback.format_exc())
         sys.exit(1)

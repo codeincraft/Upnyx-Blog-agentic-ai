@@ -1,0 +1,22 @@
+2025-11-02 23:54:44,886 | INFO | 🧠 Attempting to initialize model: llama-3.1-8b-instant
+2025-11-02 23:54:44,916 | INFO | ✅ Successfully initialized model: llama-3.1-8b-instant
+2025-11-02 23:54:44,917 | INFO | 🤖 Agent successfully initialized.
+
+2025-11-02 23:54:57,585 | INFO | 🚀 Generating blog content...
+2025-11-02 23:54:58,250 | INFO | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-02 23:55:05,873 | INFO | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-02 23:55:13,144 | INFO | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-02 23:55:14,944 | ERROR | Unexpected error during blog generation:
+2025-11-02 23:59:30,825 | INFO | 🧠 Attempting to initialize model: llama-3.1-8b-instant
+2025-11-02 23:59:30,853 | INFO | ✅ Successfully initialized model: llama-3.1-8b-instant
+2025-11-02 23:59:30,854 | INFO | 🤖 Agent successfully initialized.
+
+2025-11-02 23:59:46,268 | INFO | 🚀 Generating blog content...
+2025-11-02 23:59:46,937 | INFO | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-02 23:59:54,899 | INFO | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-03 00:00:02,632 | INFO | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-03 00:00:04,008 | INFO | Error in engine wikipedia: DDGSException("RuntimeError: RuntimeError('error sending request for url (https://wt.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=latest%20news%20on%20artificial%20intelligence): client error (Connect)\\n\\nCaused by:\\n    0: client error (Connect)\\n    1: dns error: failed to lookup address information: nodename nor servname provided, or not known\\n    2: failed to lookup address information: nodename nor servname provided, or not known')")
+2025-11-03 00:00:04,745 | INFO | response: https://www.bing.com/search?q=latest+news+on+artificial+intelligence&pq=latest+news+on+artificial+intelligence&cc=wt&filters=ex1%3A%22ez5_20029_20394%22 200
+2025-11-03 00:00:05,376 | INFO | response: https://yandex.com/search/site/?text=latest+news+on+artificial+intelligence&web=1&searchid=5231746 200
+2025-11-03 00:00:05,733 | INFO | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-03 00:00:06,477 | INFO | ✅ Blog successfully generated.
